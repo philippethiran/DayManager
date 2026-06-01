@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import {
   Task,
   TaskCreatePayload,
+  TaskGrouped,
   TaskUpdatePayload,
 } from '../models/task.model';
 
@@ -14,9 +15,9 @@ const API_BASE = 'http://localhost:8000/api';
 export class TaskService {
   constructor(private readonly http: HttpClient) {}
 
-  listForDate(taskDate: string): Observable<Task[]> {
-    const params = new HttpParams().set('date', taskDate);
-    return this.http.get<Task[]>(`${API_BASE}/tasks`, { params });
+  listGrouped(referenceDate: string): Observable<TaskGrouped> {
+    const params = new HttpParams().set('reference_date', referenceDate);
+    return this.http.get<TaskGrouped>(`${API_BASE}/tasks`, { params });
   }
 
   create(payload: TaskCreatePayload): Observable<Task> {

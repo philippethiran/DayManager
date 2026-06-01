@@ -1,5 +1,5 @@
-from datetime import date, datetime, time
-from typing import Optional
+from datetime import date, datetime
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -7,7 +7,6 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 class TaskCreate(BaseModel):
     title: str = Field(min_length=1, max_length=500)
     task_date: date
-    due_time: Optional[time] = None
 
     @field_validator("title")
     @classmethod
@@ -20,8 +19,7 @@ class TaskCreate(BaseModel):
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = Field(default=None, min_length=1, max_length=500)
-    due_time: Optional[time] = None
-    is_done: Optional[bool] = None
+    task_date: Optional[date] = None
 
     @field_validator("title")
     @classmethod
@@ -40,6 +38,9 @@ class TaskRead(BaseModel):
     id: int
     title: str
     task_date: date
-    due_time: Optional[time]
-    is_done: bool
     created_at: datetime
+
+
+class TaskGroupedRead(BaseModel):
+    today: List[TaskRead]
+    future: List[TaskRead]

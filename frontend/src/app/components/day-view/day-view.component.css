@@ -9,19 +9,12 @@
   margin: 0 0 0.25rem;
 }
 
-.day-view__date {
-  margin: 0 0 1rem;
-  color: #444;
+.day-view__subtitle {
+  margin: 0 0 1.5rem;
+  color: #555;
 }
 
-.day-view__nav {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.day-view__add form,
-.day-view__list ul {
+.day-view__add form {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -37,13 +30,50 @@
   color: #b00020;
 }
 
-.day-view__list ul {
+.day-view__loading,
+.day-view__empty {
+  color: #666;
+}
+
+.day-view__section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e0e0e0;
+}
+
+.day-view__section--today {
+  border-top: none;
+  margin-top: 1rem;
+  padding-top: 0;
+}
+
+.day-view__section h2 {
+  margin: 0 0 0.25rem;
+}
+
+.day-view__section-date,
+.day-view__future-date {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #444;
+}
+
+.day-view__future-group {
+  margin-bottom: 1.25rem;
+}
+
+.day-view__section ul,
+.day-view__future-group ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.day-view__list li {
+.day-view__section li {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -51,23 +81,11 @@
   padding: 0.75rem;
   border: 1px solid #ddd;
   border-radius: 0.5rem;
+  background: #fff;
 }
 
-.day-view__list li.is-done .task-row__title {
-  text-decoration: line-through;
-  color: #777;
-}
-
-.task-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.task-row__title {
   flex: 1;
-}
-
-.task-row__time {
-  color: #555;
-  font-size: 0.9rem;
 }
 
 .task-row__delete {

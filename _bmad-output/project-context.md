@@ -1,4 +1,4 @@
-# SimpleApp — Project Context
+# DayManager — Project Context
 
 Lean reference for AI agents working on this codebase.
 
@@ -42,10 +42,17 @@ docs/        # Project knowledge (when added)
 - Prefer Angular built-ins (HttpClient, reactive forms, router) over third-party UI libraries unless requested.
 - Handle loading and error states in the UI for every API call.
 
+### Manual tasks (current MVP)
+
+- A manual task has **title** and **task_date** only (calendar date, no time, no done flag).
+- UI: **Today** section (upper) and **Future** section (lower), using the browser’s local calendar date as “today”.
+- `GET /api/tasks?reference_date=YYYY-MM-DD` returns `{ today: [...], future: [...] }` (tasks with `task_date >= reference_date`, split at reference date).
+- Past-dated tasks remain in SQLite but are not listed until their date is today or in the future relative to the reference date.
+
 ### API Contract
 
-- REST endpoints under `/api/` (e.g. `/api/items`).
-- JSON field names in `snake_case` on the backend; map to `camelCase` in the frontend if that is the Angular convention — but be consistent within each layer.
+- REST endpoints under `/api/` (e.g. `/api/tasks`).
+- JSON field names in `snake_case` on the backend; keep frontend TypeScript interfaces aligned with Pydantic schemas.
 - Version breaking API changes only when necessary; update both backend schemas and frontend services together.
 
 ### Testing & Quality

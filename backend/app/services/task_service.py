@@ -4,27 +4,31 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.task import Task
-from app.schemas.task import TaskCreate, TaskUpdate
+from app.schemas.task import TaskCreate, TaskGroupedRead, TaskRead, TaskUpdate
 
 
-def _sort_key(task: Task) -> tuple:
-    if task.due_time is not None:
-        return (0, task.due_time, "")
-    return (1, task.due_time, task.title.lower())
-
-
-def list_tasks_for_date(db: Session, task_date: date) -> list[Task]:
-    tasks = db.query(Task).filter(Task.task_date == task_date).all()
-    return sorted(tasks, key=_sort_key)
+def list_tasks_grouped(db: Session, reference_date: date) -> TaskGroupedRead:
+    tasks = (
+        db.query(Task)
+        .filter(Task.task_date >= reference_date)
+        .order_by(Task.task_date, Task.title)
+        .all()
+    )
+    today = [
+        TaskRead.model_validate(task)
+        for task in tasks
+        if task.task_date == reference_date
+    ]
+    future = [
+        TaskRead.model_validate(task)
+        for task in tasks
+        if task.task_date > reference_date
+    ]
+    return TaskGroupedRead(today=today, future=future)
 
 
 def create_task(db: Session, payload: TaskCreate) -> Task:
-    task = Task(
-        title=payload.title,
-        task_date=payload.task_date,
-        due_time=payload.due_time,
-        is_done=False,
-    )
+    task = Task(title=payload.title, task_date=payload.task_date)
     db.add(task)
     db.commit()
     db.refresh(task)

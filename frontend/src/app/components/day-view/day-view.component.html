@@ -1,12 +1,7 @@
 <main class="day-view">
   <header class="day-view__header">
     <h1>DayManager</h1>
-    <p class="day-view__date">{{ formattedSelectedDate }}</p>
-    <div class="day-view__nav">
-      <button type="button" (click)="shiftDay(-1)">Previous day</button>
-      <button type="button" (click)="goToToday()">Today</button>
-      <button type="button" (click)="shiftDay(1)">Next day</button>
-    </div>
+    <p class="day-view__subtitle">Manual tasks — title and date</p>
   </header>
 
   <section class="day-view__add">
@@ -23,8 +18,14 @@
         />
       </label>
       <label>
-        Time (optional)
-        <input type="time" name="time" [(ngModel)]="newTime" [disabled]="saving" />
+        Date
+        <input
+          type="date"
+          name="taskDate"
+          [(ngModel)]="newTaskDate"
+          [disabled]="saving"
+          required
+        />
       </label>
       <button type="submit" [disabled]="saving || !newTitle.trim()">
         {{ saving ? 'Adding…' : 'Add task' }}
@@ -36,27 +37,35 @@
     {{ errorMessage }}
   </p>
 
-  <section class="day-view__list">
-    <h2>Tasks</h2>
-    <p *ngIf="loading">Loading tasks…</p>
-    <p *ngIf="!loading && tasks.length === 0">No tasks for this day.</p>
-    <ul *ngIf="!loading && tasks.length > 0">
-      <li *ngFor="let task of tasks" [class.is-done]="task.is_done">
-        <label class="task-row">
-          <input
-            type="checkbox"
-            [checked]="task.is_done"
-            (change)="toggleDone(task)"
-          />
-          <span class="task-row__title">{{ task.title }}</span>
-          <span *ngIf="task.due_time" class="task-row__time">
-            {{ formatDueTime(task.due_time) }}
-          </span>
-        </label>
+  <p *ngIf="loading" class="day-view__loading">Loading tasks…</p>
+
+  <section *ngIf="!loading" class="day-view__section day-view__section--today">
+    <h2>Today</h2>
+    <p class="day-view__section-date">{{ formattedToday }}</p>
+    <p *ngIf="todayTasks.length === 0" class="day-view__empty">No tasks for today.</p>
+    <ul *ngIf="todayTasks.length > 0">
+      <li *ngFor="let task of todayTasks">
+        <span class="task-row__title">{{ task.title }}</span>
         <button type="button" class="task-row__delete" (click)="removeTask(task)">
           Delete
         </button>
       </li>
     </ul>
+  </section>
+
+  <section *ngIf="!loading" class="day-view__section day-view__section--future">
+    <h2>Future</h2>
+    <p *ngIf="futureTasks.length === 0" class="day-view__empty">No upcoming tasks.</p>
+    <div *ngFor="let group of futureGroups" class="day-view__future-group">
+      <h3 class="day-view__future-date">{{ group.label }}</h3>
+      <ul>
+        <li *ngFor="let task of group.tasks">
+          <span class="task-row__title">{{ task.title }}</span>
+          <button type="button" class="task-row__delete" (click)="removeTask(task)">
+            Delete
+          </button>
+        </li>
+      </ul>
+    </div>
   </section>
 </main>

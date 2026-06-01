@@ -41,6 +41,9 @@ Open http://localhost:4200 — the UI calls the API at http://localhost:8000.
 
 ## MVP scope
 
-- View and add manual tasks for a calendar day (local browser timezone)
-- Optional time and done checkbox per task
+- Manual tasks: **title** + **date**, stored in SQLite
+- UI: **Today** (top) and **Future** (bottom), based on your browser’s local date
+- Add form: title and date (defaults to today)
 - Google Calendar integration is deferred (see `_bmad-output/implementation-artifacts/deferred-work.md`)
+
+If you upgraded from an older schema (time/done fields), delete `backend/app.db` and restart the API to recreate the database.

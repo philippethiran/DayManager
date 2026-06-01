@@ -4,18 +4,18 @@ from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.schemas.task import TaskCreate, TaskRead, TaskUpdate
+from app.schemas.task import TaskCreate, TaskGroupedRead, TaskRead, TaskUpdate
 from app.services import task_service
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
 
-@router.get("", response_model=list[TaskRead])
+@router.get("", response_model=TaskGroupedRead)
 def list_tasks(
-    date: date = Query(..., alias="date"),
+    reference_date: date = Query(..., alias="reference_date"),
     db: Session = Depends(get_db),
 ):
-    return task_service.list_tasks_for_date(db, date)
+    return task_service.list_tasks_grouped(db, reference_date)
 
 
 @router.post("", response_model=TaskRead, status_code=status.HTTP_201_CREATED)

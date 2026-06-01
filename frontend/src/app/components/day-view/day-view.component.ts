@@ -13,10 +13,12 @@ import { TaskService } from '../../services/task.service';
   styleUrl: './day-view.component.css',
 })
 export class DayViewComponent implements OnInit {
-  selectedDate = formatLocalDate(new Date());
-  tasks: Task[] = [];
+  readonly todayDate = formatLocalDate(new Date());
+
+  todayTasks: Task[] = [];
+  futureTasks: Task[] = [];
   newTitle = '';
-  newTime = '';
+  newTaskDate = this.todayDate;
   loading = false;
   saving = false;
   errorMessage = '';
@@ -27,36 +29,31 @@ export class DayViewComponent implements OnInit {
     this.loadTasks();
   }
 
-  get formattedSelectedDate(): string {
-    const [year, month, day] = this.selectedDate.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString(undefined, {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+  get formattedToday(): string {
+    return formatDisplayDate(this.todayDate);
   }
 
-  shiftDay(offset: number): void {
-    const [year, month, day] = this.selectedDate.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-    date.setDate(date.getDate() + offset);
-    this.selectedDate = formatLocalDate(date);
-    this.loadTasks();
-  }
-
-  goToToday(): void {
-    this.selectedDate = formatLocalDate(new Date());
-    this.loadTasks();
+  get futureGroups(): { date: string; label: string; tasks: Task[] }[] {
+    const groups = new Map<string, Task[]>();
+    for (const task of this.futureTasks) {
+      const existing = groups.get(task.task_date) ?? [];
+      existing.push(task);
+      groups.set(task.task_date, existing);
+    }
+    return Array.from(groups.entries()).map(([date, tasks]) => ({
+      date,
+      label: formatDisplayDate(date),
+      tasks,
+    }));
   }
 
   loadTasks(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.taskService.listForDate(this.selectedDate).subscribe({
-      next: (tasks) => {
-        this.tasks = tasks;
+    this.taskService.listGrouped(this.todayDate).subscribe({
+      next: (grouped) => {
+        this.todayTasks = grouped.today;
+        this.futureTasks = grouped.future;
         this.loading = false;
       },
       error: () => {
@@ -77,14 +74,13 @@ export class DayViewComponent implements OnInit {
     this.errorMessage = '';
     const payload = {
       title,
-      task_date: this.selectedDate,
-      due_time: this.newTime ? `${this.newTime}:00` : null,
+      task_date: this.newTaskDate,
     };
 
     this.taskService.create(payload).subscribe({
       next: () => {
         this.newTitle = '';
-        this.newTime = '';
+        this.newTaskDate = this.todayDate;
         this.saving = false;
         this.loadTasks();
       },
@@ -95,42 +91,30 @@ export class DayViewComponent implements OnInit {
     });
   }
 
-  toggleDone(task: Task): void {
-    const nextDone = !task.is_done;
-    this.taskService.update(task.id, { is_done: nextDone }).subscribe({
-      next: (updated) => {
-        this.tasks = this.tasks.map((item) =>
-          item.id === updated.id ? updated : item
-        );
-      },
-      error: () => {
-        this.errorMessage = 'Could not update the task.';
-      },
-    });
-  }
-
   removeTask(task: Task): void {
     this.taskService.delete(task.id).subscribe({
-      next: () => {
-        this.tasks = this.tasks.filter((item) => item.id !== task.id);
-      },
+      next: () => this.loadTasks(),
       error: () => {
         this.errorMessage = 'Could not delete the task.';
       },
     });
   }
-
-  formatDueTime(dueTime: string | null): string {
-    if (!dueTime) {
-      return '';
-    }
-    return dueTime.slice(0, 5);
-  }
 }
 
-function formatLocalDate(date: Date): string {
+export function formatLocalDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function formatDisplayDate(isoDate: string): string {
+  const [year, month, day] = isoDate.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString(undefined, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 }
